@@ -1,0 +1,24 @@
+{
+  "name": "VCC Capture for Chrome",
+  "manifest_version": 2, 
+  "version": "1.0.0",
+  "description": "Allows the use of Chrome to capture creatures",
+  "permissions": [
+    "http://127.0.0.1:4143/*",
+	"https://api.twitter.com/*"
+  ],
+  "icons": {
+    "16" : "images/d20metal-16.png",
+    "48" : "images/d20metal-48.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://www.wizards.com/dndinsider/compendium/database.aspx*", "http://www.wizards.com/dndinsider/compendium/monster.aspx*"],
+      "js" : ["dndicapture.js", "contentscript.js" ],
+	  "all_frames" : true
+    }
+  ],
+  "web_accessible_resources": [
+	"images/camera.png"
+  ]
+}
