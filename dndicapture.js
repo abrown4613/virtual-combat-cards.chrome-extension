@@ -17,8 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 var dndiCapture = {
-	vccURL: "http://127.0.0.1:4143", 
-    withGetReply: function (path, okCallback, errorCallback) {
+    vccURL:"http://127.0.0.1:4143",
+    withGetReply:function (path, okCallback, errorCallback) {
         var url = this.vccURL,
             xmlHttp = new XMLHttpRequest();
 
@@ -29,7 +29,7 @@ var dndiCapture = {
                         okCallback(xmlHttp.responseText);
                     }
                 } else {
-                    if (errorCallback) { 
+                    if (errorCallback) {
                         errorCallback(xmlHttp.status, xmlHttp.responseText);
                     }
                 }
@@ -38,21 +38,21 @@ var dndiCapture = {
         xmlHttp.open("GET", url + path, true);
         xmlHttp.send(null);
     },
-	onVCCFound: function (callback) {
-            // Go ahead
-            this.withGetReply("/capture?has=reply-text", function (response) {
-                if (response === "true") {
-                    console.log("Found VCC");
-					callback();
-                } else {
-                    console.log("Wrong Virtual Combat Cards Version", "The version of Virtual Combat Cards you are running does not support this automation. Please upgrade to version 1.4.0 or higher");
-                }
-            }, function (code, response) {
-                console.log("Virtual Combat Cards Server not found");
-            });
-	},
+    onVCCFound:function (callback) {
+        // Go ahead
+        this.withGetReply("/capture?has=reply-text", function (response) {
+            if (response === "true") {
+                console.log("Found VCC");
+                callback();
+            } else {
+                console.log("Wrong Virtual Combat Cards Version", "The version of Virtual Combat Cards you are running does not support this automation. Please upgrade to version 1.4.0 or higher");
+            }
+        }, function () {
+            console.log("Virtual Combat Cards Server not found");
+        });
+    },
     // Callback is only used if we have success, otherwise we stop everything
-    sendCapture: function (callback) {
+    sendCapture:function (onSuccess, onFailure) {
         var url = this.vccURL + "/capture?reply=plugin-text",
             data = this.findSection(),
             xmlHttp = new XMLHttpRequest(),
@@ -70,16 +70,19 @@ var dndiCapture = {
                 if (xmlHttp.status === 200) {
                     fields = xmlHttp.responseText.split(":");
                     if (fields.length === 2) {
-                        console.log("Got: " + fields[1] + " - " + fields[0]);
+                        console.log("Response: " + fields[1] + " - " + fields[0]);
+                        if (fields[0] === "Success") {
+                            if (onSuccess) onSuccess(fields[1]);
+                        } else {
+                            if (onFailure) onFailure(xmlHttp.responseText);
+                        }
                     } else {
+                        if (onFailure) onFailure(xmlHttp.responseText);
                         console.log("Got: " + fields[0]);
                     }
-                    if (callback) {
-                        callback(xmlHttp);
-                    }
                 } else {
-                    dndiCapture.addResult("Failed to contact VCC", "Failed");
-                    dndiCapture.AutoCapture.stopAutomation();
+                    console.log("Failed operation, status =  " + xmlHttp.statusText);
+                    if (onFailure) onFailure("Failed request: " + xmlHttp.statusText);
                 }
             }
         };
@@ -92,7 +95,7 @@ var dndiCapture = {
         // Send the request
         xmlHttp.send(data);
     },
-    getEntryID: function (url) {
+    getEntryID:function (url) {
         var re = new RegExp("id=([0-9]+)"),
             match = re.exec(url);
         if (match && match.length === 2) {
@@ -101,30 +104,28 @@ var dndiCapture = {
             return null;
         }
     },
-    findSection: function () {
+    findSection:function () {
         var doc = document,
-            id, 
-            data, 
-            xmldom, 
-            res;
-
+            id,
+            data,
+            xmlDom;
         if (doc !== null) {
             data = doc.getElementById("detail");
             id = this.getEntryID(doc.location);
 
             if (id !== null && data !== null) {
-				var xmldom = document.implementation.createDocument(
-					'http://www.w3.org/1999/xhtml',
-					'div',
-					null);
+                xmlDom = document.implementation.createDocument(
+                    'http://www.w3.org/1999/xhtml',
+                    'div',
+                    null);
 
-				xmldom.replaceChild(
-					xmldom.importNode(data, true),
-					xmldom.documentElement);
-				xmldom.documentElement.setAttribute("id", id);
-                return xmldom;
+                xmlDom.replaceChild(
+                    xmlDom.importNode(data, true),
+                    xmlDom.documentElement);
+                xmlDom.documentElement.setAttribute("id", id);
+                return xmlDom;
             }
-		}
+        }
         return null;
-    }	
+    }
 };
