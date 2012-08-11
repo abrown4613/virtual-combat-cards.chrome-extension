@@ -1,5 +1,5 @@
 /*global window, Components, ActiveXObject, BrowserToolboxCustomizeDone, XPathResult, XMLSerializer*/
-/*jslint white: true, onevar: true, undef: true, newcap: true, nomen: true, regexp: true, plusplus: true, bitwise: true, devel: true, browser: true, windows: true, maxerr: 50, indent: 4 */
+/*jslint white: true, undef: true, newcap: true, nomen: true, regexp: true, plusplus: true, bitwise: true, devel: true, browser: true, windows: true, maxerr: 50, indent: 4 */
 /*
  * Copyright (C) 2008-2012 - Thomas Santana <tms@exnebula.org>
  *
@@ -38,17 +38,18 @@ var dndiCapture = {
         xmlHttp.open("GET", url + path, true);
         xmlHttp.send(null);
     },
-    onVCCFound:function (callback) {
-        // Go ahead
+    checkVCC:function (onGood, onBad) {
         this.withGetReply("/capture?has=reply-text", function (response) {
             if (response === "true") {
                 console.log("Found VCC");
-                callback();
+                onGood();
             } else {
-                console.log("Wrong Virtual Combat Cards Version", "The version of Virtual Combat Cards you are running does not support this automation. Please upgrade to version 1.4.0 or higher");
+                console.log("The version of Virtual Combat Cards you are running does not support this integration. Please upgrade to version 1.4.0 or higher");
+                onBad("BadVersion");
             }
         }, function () {
             console.log("Virtual Combat Cards Server not found");
+            onBad("NotFound");
         });
     },
     // Callback is only used if we have success, otherwise we stop everything
@@ -72,17 +73,25 @@ var dndiCapture = {
                     if (fields.length === 2) {
                         console.log("Response: " + fields[1] + " - " + fields[0]);
                         if (fields[0] === "Success") {
-                            if (onSuccess) onSuccess(fields[1]);
+                            if (onSuccess) {
+                                onSuccess(fields[1]);
+                            }
                         } else {
-                            if (onFailure) onFailure(xmlHttp.responseText);
+                            if (onFailure) {
+                                onFailure(xmlHttp.responseText);
+                            }
                         }
                     } else {
-                        if (onFailure) onFailure(xmlHttp.responseText);
+                        if (onFailure) {
+                            onFailure(xmlHttp.responseText);
+                        }
                         console.log("Got: " + fields[0]);
                     }
                 } else {
                     console.log("Failed operation, status =  " + xmlHttp.statusText);
-                    if (onFailure) onFailure("Failed request: " + xmlHttp.statusText);
+                    if (onFailure) {
+                        onFailure("Failed request: " + xmlHttp.statusText);
+                    }
                 }
             }
         };
@@ -97,12 +106,12 @@ var dndiCapture = {
     },
     getEntryID:function (url) {
         var re = new RegExp("id=([0-9]+)"),
-            match = re.exec(url);
+            match = re.exec(url),
+            result = null;
         if (match && match.length === 2) {
-            return (match[1]);
-        } else {
-            return null;
+            result = (match[1]);
         }
+        return result;
     },
     findSection:function () {
         var doc = document,

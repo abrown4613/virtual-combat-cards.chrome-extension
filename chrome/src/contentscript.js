@@ -1,3 +1,4 @@
+/*jslint sloppy: true, browser: true, devel: true */
 /*
  * Copyright (C) 2008-2012 - Thomas Santana <tms@exnebula.org>
  *
@@ -15,15 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 function buildBar() {
-    var actionBar = document.createElement('div');
-    var title_dom = document.createElement('strong');
-    title_dom.innerText = 'D&D Insider Capture: ';
+    var actionBar = document.createElement('div'),
+        title_dom = document.createElement('strong'),
+        actionImage = document.createElement('img'),
+        actionLink = document.createElement('a'),
+        style = document.createElement('link');
     actionBar.appendChild(title_dom);
     actionBar.setAttribute('class', 'vcc-bar');
     actionBar.setAttribute('id', 'vcc-bar');
-    var actionImage = document.createElement('img');
     actionImage.setAttribute('src', chrome.extension.getURL('images/camera.png'));
-    var actionLink = document.createElement('a');
     actionLink.setAttribute('href', '#');
     actionLink.appendChild(actionImage);
     actionLink.appendChild(document.createTextNode(" Capture"));
@@ -32,7 +33,7 @@ function buildBar() {
             var bar = document.getElementById('vcc-bar');
             bar.innerHTML = "Captured " + content;
             bar.setAttribute('class', 'vcc-bar vcc-complete');
-        }, function(error) {
+        }, function (error) {
             var bar = document.getElementById('vcc-bar');
             bar.innerHTML = "Failed to capture: " + error;
             bar.setAttribute('class', 'vcc-bar vcc-error');
@@ -41,7 +42,6 @@ function buildBar() {
     actionLink.style.color = '#000';
     actionBar.appendChild(actionLink);
 
-    var style = document.createElement('link');
     style.rel = 'stylesheet';
     style.type = 'text/css';
     style.href = chrome.extension.getURL('css/bar.css');
@@ -50,6 +50,11 @@ function buildBar() {
     document.body.parentElement.insertBefore(actionBar, document.body);
 }
 
-if(dndiCapture.getEntryID(document.location)) {
-    dndiCapture.onVCCFound(buildBar);
-}
+dndiCapture.checkVCC(function () {
+    if (dndiCapture.getEntryID(document.location)) {
+        buildBar();
+    }
+    chrome.extension.sendRequest({action: "show_page_action", vccPresent: true});
+}, function (message) {
+    chrome.extension.sendRequest({action: "show_page_action", vccPresent: false, message: message});
+});

@@ -11,6 +11,14 @@
         "16":"images/d20metal-16.png",
         "48":"images/d20metal-48.png"
     },
+    "page_action":{
+        "default_icon":"images/d20metal-16.png",
+        "default_title":"Virtual Combat Cards Capture Extension",
+        "default_popup":"popup.html"
+    },
+    "background":{
+        "scripts":["background.js"]
+    },
     "content_scripts":[
         {
             "matches":[
