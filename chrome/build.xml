@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="zip-test" default="zip" basedir=".">
+
+	<property name="project-name" value="vcc-chrome" />
+	<property name="folder-to-zip" value="src" />
+	<property name="unzip-destination" value="target/unzipped" />
+
+	<target name="clean">
+		<delete file="target/${project-name}.zip" />
+		<delete dir="${unzip-destination}" />
+	</target>
+
+	<target name="zip">
+		<zip destfile="target/${project-name}.zip" basedir="${folder-to-zip}" excludes="dont*.*" />
+	</target>
+
+	<target name="unzip">
+		<unzip src="target/${project-name}.zip" dest="${unzip-destination}" />
+	</target>
+
+</project>
