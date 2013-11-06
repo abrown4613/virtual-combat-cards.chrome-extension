@@ -1,8 +1,8 @@
 {
-    "name":"VCC Capture for Chrome",
+    "name":"Virtual Combat Cards Capture",
     "manifest_version":2,
-    "version":"1.0.1",
-    "description":"Allows the use of Chrome to capture creatures",
+    "version":"1.0.2",
+    "description":"Extension that capturing compendium entries in Virtual Combat Cards.",
     "permissions":[
         "http://127.0.0.1:4143/*"
     ],
